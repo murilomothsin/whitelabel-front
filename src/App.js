@@ -1,26 +1,34 @@
+    
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { connect } from 'react-redux';
+import { Route, Redirect } from "react-router-dom";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import { getToken } from './reducers/auth'
 
-export default App;
+import Layout from "./Components/Layout/Layout.js";
+import Login from "./Components/Login";
+import Products from "./Components/Products";
+
+export const PrivateRoute = ({ component: Component, ...rest }) => (
+  <Route {...rest} render={(props) => (
+    rest.token
+      ? <Component {...props} {...rest} />
+      : <Redirect to={{
+        pathname: '/login',
+        state: { from: props.location }
+      }} />
+  )} />
+);
+
+const App = (props) => (
+  <Layout>
+    <Route exact path="/login" component={Login} />
+    <PrivateRoute path="/products" component={Products} token={props.token} />
+  </Layout>
+)
+
+const mapStateToProps = store => ({
+  token: getToken(store)
+});
+
+export default connect(mapStateToProps)(App);
